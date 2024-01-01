@@ -23,14 +23,15 @@ d3.json("gistfile1.js").then(function(geojson){
 
             for (var j = 0; j < data.length; j++) {
                 var dataCountry = data[j].country;
-                var dataValue = data[j].y2022;
-                geojson.features[i].properties.value = -1;
+                geojson.features[i].properties.value = [null]
                 if (dataCountry == jsonCountryName) {
-                    geojson.features[i].properties.value = dataValue;
+                    var arrValue = [data[j].y2018, data[j].y2019, data[j].y2020, data[j].y2021, data[j].y2022]
+                    geojson.features[i].properties.value = arrValue
                     break;
                 }
             }
         }
+        console.log(geojson.features)
         draw_chart(geojson)
     })
 })
@@ -52,9 +53,8 @@ function draw_chart(geojson){
         var path = d3.geoPath()
                         .projection(projection);
         
-        console.log(geojson.features)
         var max_color = d3.max(geojson.features, function(d){
-            return d.properties.value
+            return d.properties.value[0]
         })
         var colorScale = d3.scaleLinear().domain([0, max_color]).range([200, 250])
         console.log("Max color: " + max_color)
@@ -68,12 +68,11 @@ function draw_chart(geojson){
                 .style("stroke", "black")
                 .attr("cursor", "pointer")
                 .attr("fill", function(d){
-                    if(d.properties.value == -1){
-                        console.log("Grey selected")
+                    if(d.properties.value[0] == null){
                         return "rgb(128, 128, 128)"
                     }
                     else{
-                        return "rgb(128, 0, " + colorScale(d.properties.value) + ")"
+                        return "rgb(128, 0, " + colorScale(d.properties.value[4]) + ")"
                     }
                 })
     }

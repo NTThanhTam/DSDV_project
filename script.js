@@ -32,11 +32,19 @@ d3.json("gistfile1.js").then(function(geojson){
             }
         }
         console.log(geojson.features)
-        draw_chart(geojson)
+        draw_chart(geojson, "y2022")
     })
 })
 
-function draw_chart(geojson){
+year_indexes = {
+    "y2018": 0,
+    "y2019": 1,
+    "y2020": 2,
+    "y2021": 3,
+    "y2022": 4
+}
+
+function draw_chart(geojson, year){
         var height = 800
         var width = 800
     
@@ -47,16 +55,22 @@ function draw_chart(geojson){
                     .attr("display", "block")
                     .attr("margin", "auto")
     
+        var year_index = year_indexes[year]
                     
         var projection = d3.geoMercator().fitSize([width, height], geojson)
     
         var path = d3.geoPath()
                         .projection(projection);
+
+        var min_color = d3.min(geojson.features, function(d){
+            return d.properties.value[year_index]
+        })
         
         var max_color = d3.max(geojson.features, function(d){
-            return d.properties.value[0]
+            return d.properties.value[year_index]
         })
-        var colorScale = d3.scaleLinear().domain([0, max_color]).range([200, 250])
+        var colorScale = d3.scaleLinear().domain([min_color, max_color]).range([200, 250])
+        console.log("Min color: " + min_color)
         console.log("Max color: " + max_color)
         
         svg.selectAll("path")
@@ -68,11 +82,28 @@ function draw_chart(geojson){
                 .style("stroke", "black")
                 .attr("cursor", "pointer")
                 .attr("fill", function(d){
-                    if(d.properties.value[0] == null){
+                    if(d.properties.value[year_index] == null){
                         return "rgb(128, 128, 128)"
                     }
                     else{
-                        return "rgb(128, 0, " + colorScale(d.properties.value[4]) + ")"
+                        return "rgb(128, 0, " + colorScale(d.properties.value[year_index]) + ")"
                     }
                 })
+                .on("mouseover", function(d){
+                    console.log(d.name)
+                    // svg
+                    //     .append("text").attr("class", "title-text")
+                    //     .style("fill", color(i))
+                    //     .text(d.name + "efzeiufzihefizeifiu")
+                    //     .attr("text-anchor", "middle")
+                    //     .attr("x", 200)
+                    //     .attr("y", 30);
+                })
+
+        d3.select("#year-select").on("change", function (event, d) {
+            let criterion = event.target.value;
+            d3.select("svg").remove()
+            draw_chart(geojson, criterion)  
+        }
+        )
     }

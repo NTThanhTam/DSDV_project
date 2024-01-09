@@ -1,6 +1,20 @@
-#world_map_SVG {
-    display: block;
-    margin: auto;
-    align-items: center;
-    height: 100vh;
-  }
+* {
+  font-family: Arial;
+}
+
+#project_title{
+  font-size: 24px;
+}
+
+#title{
+  text-align: center;
+}
+
+.year-select-label select {
+  background-color: lightyellow;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+  color: #333;
+}

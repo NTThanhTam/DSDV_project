@@ -52,8 +52,8 @@ function draw_chart(geojson, year){
                     .append("svg")
                     .attr("width", width)
                     .attr("height", height)
-                    .attr("display", "block")
-                    .attr("margin", "auto")
+                    .style("display", "block")
+                    .style("margin", "auto")              
     
         var year_index = year_indexes[year]
                     
@@ -69,9 +69,25 @@ function draw_chart(geojson, year){
         var max_color = d3.max(geojson.features, function(d){
             return d.properties.value[year_index]
         })
-        var colorScale = d3.scaleLinear().domain([min_color, max_color]).range([200, 250])
+
         console.log("Min color: " + min_color)
         console.log("Max color: " + max_color)
+
+        // var tooltip = d3.select("body")
+        //                 .append("div")
+        //                 .style("position", "absolute")
+        //                 .style("z-index", "10")
+        //                 .style("visibility", "hidden")
+        //                 .style("background", "#000")
+        //                 .text("a simple tooltip");
+
+        var values = geojson.features.map(function(d) {
+            return d.properties.value[year_index];
+        });
+        
+        var colorScale = d3.scaleQuantile()
+            .domain(values)
+            .range([120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250]);
         
         svg.selectAll("path")
                 .data(geojson.features)
@@ -82,23 +98,19 @@ function draw_chart(geojson, year){
                 .style("stroke", "black")
                 .attr("cursor", "pointer")
                 .attr("fill", function(d){
-                    if(d.properties.value[year_index] == null){
+                    if(d.properties.value[year_index] == null || d.properties.value[year_index] == 0 || isNaN(d.properties.value[year_index])){
                         return "rgb(128, 128, 128)"
                     }
                     else{
-                        return "rgb(128, 0, " + colorScale(d.properties.value[year_index]) + ")"
+                        return "rgb(128, " + colorScale(d.properties.value[year_index]) + ", 0)"
                     }
                 })
-                .on("mouseover", function(d){
-                    console.log(d.name)
-                    // svg
-                    //     .append("text").attr("class", "title-text")
-                    //     .style("fill", color(i))
-                    //     .text(d.name + "efzeiufzihefizeifiu")
-                    //     .attr("text-anchor", "middle")
-                    //     .attr("x", 200)
-                    //     .attr("y", 30);
-                })
+                .append("svg:title")
+                .text(function(d) { 
+                    const value = "Country: " + String(d.properties.name) + "\n"
+                                + "Consumption in " + year.slice(1) + ": " + String(d.properties.value[year_index]) +"\n" 
+                    return value; })
+
 
         d3.select("#year-select").on("change", function (event, d) {
             let criterion = event.target.value;

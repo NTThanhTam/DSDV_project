@@ -16,7 +16,6 @@ var rowConverter = function(d) {
 
 d3.csv("noodles.csv", rowConverter).then(function(data){
 d3.json("gistfile1.js").then(function(geojson){
-        // console.log(data)
 
         for (var i = 0; i < geojson.features.length; i++) {
             var jsonCountryName = geojson.features[i].properties.name;
@@ -31,9 +30,23 @@ d3.json("gistfile1.js").then(function(geojson){
                 }
             }
         }
-        // console.log(geojson.features)
         // draw_geoJSON(geojson, "y2022")
-        draw_barChart(geojson, "y2022")
+        const year_index = year_indexes["y2022"]
+
+        var valid_data = []
+        for (let i = 0; i < geojson.features.length; i++) {
+            const feature = geojson.features[i]
+            if(feature.properties.value[year_index] != null && !isNaN(feature.properties.value[year_index])){
+                valid_data.push(feature)
+            }
+          }
+        
+        valid_data = valid_data.sort(function(a, b){
+            return - a.properties.value[year_index] + b.properties.value[year_index]
+        })
+        var used_data = valid_data.slice(0, 5)
+
+        draw_barChart(used_data, valid_data, "y2022")
     })
 })
 
@@ -63,14 +76,6 @@ function draw_geoJSON(geojson, year){
         var path = d3.geoPath()
                         .projection(projection);
 
-        var min_color = d3.min(geojson.features, function(d){
-            return d.properties.value[year_index]
-        })
-        
-        var max_color = d3.max(geojson.features, function(d){
-            return d.properties.value[year_index]
-        })
-
         var values = geojson.features.map(function(d) {
             return d.properties.value[year_index];
         });
@@ -78,6 +83,8 @@ function draw_geoJSON(geojson, year){
         var colorScale = d3.scaleQuantile()
             .domain(values)
             .range([120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250]);
+
+        colorScale.range(colorScale.range().reverse());
         
         svg.selectAll("path")
                 .data(geojson.features)
@@ -116,35 +123,27 @@ function draw_geoJSON(geojson, year){
         )
     }
 
-function draw_barChart(data, year){
+function draw_barChart(used_data, full_data, year){
     var height = 800
     var width = 800
     var padding = 100
 
-
-    var svg = d3.select("body")
+    var svg = d3.select("#bar_chart-svg")
                 .append("svg")
                 .attr("width", width + padding)
                 .attr("height", height + padding)
     
     const year_index = year_indexes[year]
 
-    var valid_data = []
-    for (let i = 0; i < data.features.length; i++) {
-        const feature = data.features[i]
-        if(feature.properties.value[year_index] != null && !isNaN(feature.properties.value[year_index])){
-            valid_data.push(feature)
-        }
-      }
+    used_data = used_data.sort(function(a, b){
+        return - a.properties.value[year_index] + b.properties.value[year_index]
+    })
 
-    var max_x = d3.max(data.features, function(d){
+    var max_x = d3.max(used_data, function(d){
         return d.properties.value[year_index]
     })
 
-    var max_y = valid_data.length
-
-    console.log("Max x: " + max_x)
-    console.log("Max y: " + max_y)  
+    var max_y = used_data.length
 
     var xScale = d3.scaleLinear().domain([0, max_x]).range([0, width-padding])
     var yScale = d3.scaleBand()
@@ -157,6 +156,14 @@ function draw_barChart(data, year){
     var yAxis = d3.axisLeft()
                 .scale(yScale)
 
+    var values = used_data.map(function(d) {
+        return d.properties.value[year_index];
+    });
+    var colorScale = d3.scaleQuantile()
+                        .domain(values)
+                        .range([120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250]);
+
+    colorScale.range(colorScale.range().reverse());
 
     svg.append("g")
         .attr("class", "axis")
@@ -169,7 +176,7 @@ function draw_barChart(data, year){
         .call(yAxis)
 
     svg.selectAll("rect")
-        .data(valid_data)
+        .data(used_data)
         .enter()
         .append("rect")
         .attr("width", function(d){
@@ -180,15 +187,16 @@ function draw_barChart(data, year){
         .attr("y", function(d, i){
             return yScale(i)
         })
-        // .attr("fill", function(d){
-        //     return "rgb(128, 0, " + Math.round(255-d.GRDPVND) + ")"
-        // })
+        .attr("fill", function(d){
+            return "rgb(128, " + colorScale(d.properties.value[year_index]) + ", 0)"
+        })
+        
     svg.selectAll("g.text")
-        .data(valid_data)
+        .data(used_data)
         .enter()
         .append("text")
         .attr("x", function(d){
-            return xScale(d.properties.value[year_index]) + padding  + 5
+            return xScale(d.properties.value[year_index]) + padding + 20
         })
         .attr("y", function(d, i){
             return yScale(i) + height/(max_y*2)
@@ -197,4 +205,70 @@ function draw_barChart(data, year){
             return d.properties.name
         })
 
+
+    var countries = full_data.map(function(d) {
+        return d.properties.name;
+    });
+
+    var existingCountries = used_data.map(function(d) {
+        return d.properties.name;
+    });
+
+    var select_add = d3.select("#countrySelect-add");
+    select_add
+        .selectAll("option")
+        .data(countries)
+        .enter()
+        .append("option")
+        .text(function(d) { return d; });
+
+    d3.select("#addButton")
+        .on("click", function() {
+            var selectedValue = select_add.property("value");
+            var alreadyExisted = false
+
+            for (let i = 0; i < used_data.length; i++){
+                const feature = full_data[i]
+                if (feature.properties.name == selectedValue){
+                    alreadyExisted = true
+                    break
+                }
+            }
+
+            if(!alreadyExisted){
+                for (let i = 0; i < full_data.length; i++) {
+                    const feature = full_data[i]
+                    if(feature.properties.name == selectedValue){
+                        used_data.push(feature)
+                        console.log(feature.properties.name + "  " + feature.properties.value[year_index])
+                        break
+                    }
+                    }
+                console.log(used_data)
+                d3.select("svg").remove()
+                draw_barChart(used_data, full_data, year)  
+            }
+        });
+
+        console.log(existingCountries)
+    var select_delete = d3.select("#countrySelect-delete");
+    select_delete
+        .selectAll("option")
+        .data(existingCountries)
+        .enter()
+        .append("option")
+        .text(function(d) { return d; });
+
+    d3.select("#deleteButton")
+        .on("click", function() {
+            var selectedValue = select_delete.property("value");
+
+            used_data = used_data.filter(function(d){
+                return d.properties.name != selectedValue
+            })
+
+            d3.select("svg").remove()
+            draw_barChart(used_data, full_data, year)  
+        
+        }); 
 }

@@ -31,8 +31,9 @@ d3.json("gistfile1.js").then(function(geojson){
                 }
             }
         }
-        console.log(geojson.features)
-        draw_chart(geojson, "y2022")
+        // console.log(geojson.features)
+        // draw_geoJSON(geojson, "y2022")
+        draw_barChart(geojson, "y2022")
     })
 })
 
@@ -44,9 +45,9 @@ year_indexes = {
     "y2022": 4
 }
 
-function draw_chart(geojson, year){
-        var height = 800
-        var width = 800
+function draw_geoJSON(geojson, year){
+        var height = 1000
+        var width = 1000
     
         var svg = d3.select("#world_map_SVG")
                     .append("svg")
@@ -69,17 +70,6 @@ function draw_chart(geojson, year){
         var max_color = d3.max(geojson.features, function(d){
             return d.properties.value[year_index]
         })
-
-        console.log("Min color: " + min_color)
-        console.log("Max color: " + max_color)
-
-        // var tooltip = d3.select("body")
-        //                 .append("div")
-        //                 .style("position", "absolute")
-        //                 .style("z-index", "10")
-        //                 .style("visibility", "hidden")
-        //                 .style("background", "#000")
-        //                 .text("a simple tooltip");
 
         var values = geojson.features.map(function(d) {
             return d.properties.value[year_index];
@@ -107,15 +97,104 @@ function draw_chart(geojson, year){
                 })
                 .append("svg:title")
                 .text(function(d) { 
-                    const value = "Country: " + String(d.properties.name) + "\n"
-                                + "Consumption in " + year.slice(1) + ": " + String(d.properties.value[year_index]) +"\n" 
-                    return value; })
+                    if(d.properties.value[year_index] == null || d.properties.value[year_index] == 0 || isNaN(d.properties.value[year_index])){
+                        return "No data"
+                    }
+                    else{
+                        const value = "Country: " + String(d.properties.name) + "\n"
+                        + "Consumption in " + year.slice(1) + ": " + String(d.properties.value[year_index]) +"\n" 
+                        return value;                    
+                    }
+                })
 
 
         d3.select("#year-select").on("change", function (event, d) {
             let criterion = event.target.value;
             d3.select("svg").remove()
-            draw_chart(geojson, criterion)  
+            draw_geoJSON(geojson, criterion)  
         }
         )
     }
+
+function draw_barChart(data, year){
+    var height = 800
+    var width = 800
+    var padding = 100
+
+
+    var svg = d3.select("body")
+                .append("svg")
+                .attr("width", width + padding)
+                .attr("height", height + padding)
+    
+    const year_index = year_indexes[year]
+
+    var valid_data = []
+    for (let i = 0; i < data.features.length; i++) {
+        const feature = data.features[i]
+        if(feature.properties.value[year_index] != null && !isNaN(feature.properties.value[year_index])){
+            valid_data.push(feature)
+        }
+      }
+
+    var max_x = d3.max(data.features, function(d){
+        return d.properties.value[year_index]
+    })
+
+    var max_y = valid_data.length
+
+    console.log("Max x: " + max_x)
+    console.log("Max y: " + max_y)  
+
+    var xScale = d3.scaleLinear().domain([0, max_x]).range([0, width-padding])
+    var yScale = d3.scaleBand()
+                .domain(d3.range(max_y))
+                .range([height - padding, 0])
+                .paddingInner(0.01)
+
+    var xAxis = d3.axisBottom()
+                .scale(xScale)
+    var yAxis = d3.axisLeft()
+                .scale(yScale)
+
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding + ", " + (height - padding) + ")")
+        .call(xAxis)
+
+    svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + padding + ",0)")
+        .call(yAxis)
+
+    svg.selectAll("rect")
+        .data(valid_data)
+        .enter()
+        .append("rect")
+        .attr("width", function(d){
+            return xScale(d.properties.value[year_index])
+        })
+        .attr("height", yScale.bandwidth())
+        .attr("x", padding)
+        .attr("y", function(d, i){
+            return yScale(i)
+        })
+        // .attr("fill", function(d){
+        //     return "rgb(128, 0, " + Math.round(255-d.GRDPVND) + ")"
+        // })
+    svg.selectAll("g.text")
+        .data(valid_data)
+        .enter()
+        .append("text")
+        .attr("x", function(d){
+            return xScale(d.properties.value[year_index]) + padding  + 5
+        })
+        .attr("y", function(d, i){
+            return yScale(i) + height/(max_y*2)
+        })
+        .text(function(d){
+            return d.properties.name
+        })
+
+}

@@ -28,27 +28,28 @@
             exploring trends, regional variations, and the cultural significance of this beloved dish.</h3>
     </div>
     <div id="world_map_SVG">
-        <label class="year-select-label">Year of consumption:     
-            <select id="year-select">
-                <option value="y2018">2018</option>
-                <option value="y2019">2019</option>
-                <option value="y2020">2020</option>
-                <option value="y2021">2021</option>
-                <option selected value="y2022">2022</option>
-
-            </select>
-        </label>
+        <div class="year">
+            <label class="year-select-label">Year of consumption:
+                <select id="year-select">
+                    <option value="y2018">2018</option>
+                    <option value="y2019">2019</option>
+                    <option value="y2020">2020</option>
+                    <option value="y2021">2021</option>
+                    <option selected value="y2022">2022</option>
+                </select>
+            </label>
+        </div>
     </div>
     <div id="bar_chart">
         <div id="bar_chart-svg"></div>
         <div id="modifyButtons">
             <div id="yearButtons"></div>
-            <div>
+            <div class="selectAdd">
                 <select id="countrySelect-add">
                 </select>
                 <button id="addButton">Add</button>
             </div>
-            <div>
+            <div class="selectDelete">
                 <select id="countrySelect-delete">
                 </select>
                 <button id="deleteButton">Delete</button>

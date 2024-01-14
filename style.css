@@ -138,12 +138,14 @@ body {
   border: 0;
   outline: 0;
   font: inherit;
-  width: 10rem;
-  padding: 1rem 4rem 1rem 1rem;
+  width: 200px;
+  text-align: center;
+  padding: 1rem 0rem 1rem 0rem;
   color: black;
   border-radius: 0.25em;
   box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  margin-right: 10px;
 }
 #countrySelect-add:focus {
     outline: none;
@@ -159,12 +161,14 @@ body {
   border: 0;
   outline: 0;
   font: inherit;
-  width: 10rem;
-  padding: 1rem 4rem 1rem 1rem;
+  width: 200px;
+  text-align: center;
+  padding: 1rem 0rem 1rem 0rem; 
   color: black;
   border-radius: 0.25em;
   box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  margin-right: 10px;
 }
 #countrySelect-delete:focus {
     outline: none;
@@ -196,6 +200,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  margin-left: 10px;
 }
 
 #addButton:after {
@@ -247,6 +252,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  margin-left: 10px;
 }
 
 #deleteButton:after {
@@ -284,4 +290,12 @@ body {
   }
 }
 
+#yearButtons{
+  margin-bottom: 20px;
+}
+
+.selectAdd{
+  margin-bottom: 20px;
+
+}
 

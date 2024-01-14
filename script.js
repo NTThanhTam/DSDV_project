@@ -30,7 +30,8 @@ d3.json("gistfile1.js").then(function(geojson){
                 }
             }
         }
-        // draw_geoJSON(geojson, "y2022")
+        draw_geoJSON(geojson, "y2022")
+
         const year_index = year_indexes["y2022"]
 
         var valid_data = []
@@ -124,9 +125,10 @@ function draw_geoJSON(geojson, year){
     }
 
 function draw_barChart(used_data, full_data, year){
-    var height = 800
-    var width = 800
-    var padding = 100
+    var height = 1000
+    var width = 1200
+    var padding = 150
+    var valueSpace = 100
 
     var svg = d3.select("#bar_chart-svg")
                 .append("svg")
@@ -145,7 +147,7 @@ function draw_barChart(used_data, full_data, year){
 
     var max_y = used_data.length
 
-    var xScale = d3.scaleLinear().domain([0, max_x]).range([0, width-padding])
+    var xScale = d3.scaleLinear().domain([0, max_x]).range([0, width-padding-valueSpace])
     var yScale = d3.scaleBand()
                 .domain(d3.range(max_y))
                 .range([height - padding, 0])
@@ -155,12 +157,12 @@ function draw_barChart(used_data, full_data, year){
                 .scale(xScale)
     var yAxis = d3.axisLeft()
                 .scale(yScale)
-
-    var values = used_data.map(function(d) {
+                .tickValues([])              
+    var values_color = used_data.map(function(d) {
         return d.properties.value[year_index];
     });
     var colorScale = d3.scaleQuantile()
-                        .domain(values)
+                        .domain(values_color)
                         .range([120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200, 205, 210, 215, 220, 225, 230, 235, 240, 245, 250]);
 
     colorScale.range(colorScale.range().reverse());
@@ -190,6 +192,7 @@ function draw_barChart(used_data, full_data, year){
         .attr("fill", function(d){
             return "rgb(128, " + colorScale(d.properties.value[year_index]) + ", 0)"
         })
+        .attr("class", "bar")
         
     svg.selectAll("g.text")
         .data(used_data)
@@ -202,14 +205,36 @@ function draw_barChart(used_data, full_data, year){
             return yScale(i) + height/(max_y*2)
         })
         .text(function(d){
-            return d.properties.name
+            var string = d.properties.value[year_index]
+            return string
         })
+        .attr("class", "text")
+
+    
+    svg.append("text")
+        .text("Mil of US Dollar")
+        .attr("x", width - valueSpace + 20)
+        .attr("y", height - padding + 15)
+
+
+    svg.selectAll("g.text")
+        .data(used_data)
+        .enter()
+        .append("text")
+        .attr("x", 10)
+        .attr("y", function(d, i){
+            return yScale(i) + height/(max_y*2)
+        })
+        .text(function(d){
+            var string = d.properties.name
+            return string
+        })
+        .attr("class", "text")
 
 
     var countries = full_data.map(function(d) {
         return d.properties.name;
     });
-
     var existingCountries = used_data.map(function(d) {
         return d.properties.name;
     });
@@ -220,15 +245,18 @@ function draw_barChart(used_data, full_data, year){
         .data(countries)
         .enter()
         .append("option")
-        .text(function(d) { return d; });
+        .text(function(d) { return d; })
+        .style("background-color", function(d){
+            if (existingCountries.includes(d))
+                return "rgb(157, 244, 136)"
+        })
 
     d3.select("#addButton")
         .on("click", function() {
             var selectedValue = select_add.property("value");
             var alreadyExisted = false
-
             for (let i = 0; i < used_data.length; i++){
-                const feature = full_data[i]
+                const feature = used_data[i]
                 if (feature.properties.name == selectedValue){
                     alreadyExisted = true
                     break
@@ -240,18 +268,19 @@ function draw_barChart(used_data, full_data, year){
                     const feature = full_data[i]
                     if(feature.properties.name == selectedValue){
                         used_data.push(feature)
-                        console.log(feature.properties.name + "  " + feature.properties.value[year_index])
                         break
                     }
                     }
-                console.log(used_data)
-                d3.select("svg").remove()
+                d3.select("#bar_chart-svg").select("svg").remove()
+                d3.select("#countrySelect-add").selectAll("option").remove()
+                d3.select("#countrySelect-delete").selectAll("option").remove()
+
                 draw_barChart(used_data, full_data, year)  
             }
         });
 
-        console.log(existingCountries)
     var select_delete = d3.select("#countrySelect-delete");
+    
     select_delete
         .selectAll("option")
         .data(existingCountries)
@@ -267,8 +296,36 @@ function draw_barChart(used_data, full_data, year){
                 return d.properties.name != selectedValue
             })
 
-            d3.select("svg").remove()
+            d3.select("#bar_chart-svg").select("svg").remove()
+            d3.select("#countrySelect-add").selectAll("option").remove()
+            d3.select("#countrySelect-delete").selectAll("option").remove()
             draw_barChart(used_data, full_data, year)  
-        
-        }); 
+            console.log(used_data)
+        });
+
+    var years = [2018, 2019, 2020, 2021, 2022];
+    
+    var yearButtons = d3.select("#yearButtons")
+      .selectAll("button")
+      .data(years)
+      .enter()
+      .append("button")
+      .text(function(d) { return d; })
+      .classed("year-button", true)
+      .classed("selected", function(d) { return d === 2022; });
+
+    yearButtons.on("click", function(d) {
+        var clickedButton = d3.select(this);
+
+        d3.selectAll(".year-button")
+            .classed("selected", false);
+        clickedButton.classed("selected", true);
+
+        d3.select("#bar_chart-svg").select("svg").remove()
+        d3.select("#countrySelect-add").selectAll("option").remove()
+        d3.select("#countrySelect-delete").selectAll("option").remove()
+        console.log(used_data)
+        draw_barChart(used_data, full_data, "y" + clickedButton.text())
+    });
+    
 }

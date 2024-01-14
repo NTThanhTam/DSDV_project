@@ -60,8 +60,8 @@ year_indexes = {
 }
 
 function draw_geoJSON(geojson, year){
-        var height = 1000
-        var width = 1000
+        var height = 1200
+        var width = 1600
     
         var svg = d3.select("#world_map_SVG")
                     .append("svg")
@@ -134,6 +134,7 @@ function draw_barChart(used_data, full_data, year){
                 .append("svg")
                 .attr("width", width + padding)
                 .attr("height", height + padding)
+                .style("margin-top", "30px")
     
     const year_index = year_indexes[year]
 

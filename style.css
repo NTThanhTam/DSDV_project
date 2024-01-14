@@ -8,7 +8,7 @@
 
 header.header{
   display: block;
-  background-color: rgb(157, 244, 136);
+  background-color: rgb(233, 252, 228);
   box-shadow: 0 0 0 1px rgba(53,72,91,.04), 
               0 2px 2px rgba(0,0,0,0), 
               0 4px 4px rgba(0,0,0,.01), 
@@ -17,6 +17,8 @@ header.header{
               0 30px 30px rgba(0,0,0,.02), 
               0 70px 65px rgba(0,0,0,.03);  ;
   box-sizing: border-box;
+  padding: 10px;
+  border-radius: 0 0 30px 30px;
 }
 
 .nav{
@@ -48,6 +50,11 @@ header.header{
 
 .logo {
   display: inline-block;
+  font-size: 20px;
+}
+
+.github{
+  font-size: 20px;
 }
 
 body {
@@ -79,11 +86,37 @@ body {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5),
                -2px -2px 4px rgba(0, 0, 0, 0.5),
                2px -2px 4px rgba(0, 0, 0, 0.5),
-               -2px 2px 4px rgba(0, 0, 0, 0.5);}
+               -2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 0;
+  }
+
+#world_map_SVG{
+  background-color: rgb(233, 252, 228);
+  margin-top: 30px;
+  margin-bottom: 30px;
+
+}
+
+.year-selection{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.world_map_title{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.world_map_title h4{
+  font-size: 40px;
+  font-weight: normal;
+  margin-bottom: 10px;
+}
 
 .year-select-label select {
-  /* background-color: rgb(157, 244, 136); */
-  border: 1px solid #ccc;
+  border: 1px solid rgb(157, 244, 136);
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 14px;
@@ -93,8 +126,23 @@ body {
 #year-select{
   text-align: center;
   font-weight: 800;
-  width: 100px;
-  height: 40px;
+  font-size: 20px;
+  width: 200px;
+  height: 60px;
+}
+
+#overview{
+  text-align: center;
+  font-size: 22px;
+  box-sizing: border-box;
+  line-height: 1.75em;
+  font-weight: 400;
+  word-wrap: break-word;
+  font-variant-numeric: proportional-nums;
+  margin-left: 80px;
+  margin-right: 80px;
+  margin-top: 90px;
+  margin-bottom: 90px;
 }
 
 .year-button {
@@ -112,11 +160,16 @@ body {
 }
 
 #bar_chart{
-  display: inline-flex
+  width: 100%;
+  display: inline-flex;
+  background-color: rgb(233, 252, 228);
+  margin-bottom: 30px;
 }
 
+
 #modifyButtons{
-  display: inline-block
+  display: inline-block;
+  margin-left: 60px;
 }
 
 .bar{
@@ -291,7 +344,16 @@ body {
 }
 
 #yearButtons{
+  margin-top: 30px;
   margin-bottom: 20px;
+}
+
+#yearButtons button{
+  background-color: white
+}
+
+#yearButtons button.selected{
+  background-color: rgb(157, 244, 136);
 }
 
 .selectAdd{
